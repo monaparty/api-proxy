@@ -1,0 +1,12 @@
+{
+  "name": "Monaco-ex_API_proxy",
+  "version": "0.0.1",
+  "private": true,
+  "engines": {
+    "node": "0.10.x"
+  },
+  "dependencies": {
+    "express": "~3.3.4",
+    "http-proxy": "1.14.0"
+  }
+}
