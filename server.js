@@ -19,7 +19,7 @@ proxyServer.on('upgrade', function(req, socket, head) {
 /* Avoid CORS. */
 proxyServer.on('proxyRes', function(proxyRes, req, res) {
 	res.setHeader('Access-Control-Allow-Origin', '*');
-	res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+	res.setHeader('Access-Control-Allow-Methods', 'POST, GET, DELETE, OPTIONS');
 });
 
 proxyServer.listen(process.env.PORT || 5000);
