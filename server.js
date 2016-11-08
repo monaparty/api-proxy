@@ -9,7 +9,6 @@ var proxy = httpProxy.createProxyServer({
 });
 
 var proxyServer = http.createServer(function (req, res) {
-	req.headers['Host'] = 'localhost';
 	proxy.web(req, res);
 });
 
