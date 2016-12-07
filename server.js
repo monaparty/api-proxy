@@ -18,15 +18,33 @@ var basic = auth.basic({
 	}
 );
 
-var proxyServer = http.createServer(basic, function (req, res) {
-	proxy.web(req, res);
+var le = require('letsencrypt').create(
+  { server: 'https://acme-v01.api.letsencrypt.org/directory'
 });
 
+var opts = {
+  email: process.env.EMAIL,
+  agreeTos: true,
+  domains: [ process.env.DOMAIN ],
+};
+
+function register() {
+  le.register(opts).then(function (certs) {
+      console.log(certs);
+    }, function (err) {
+      console.error(err);
+      setTimeout(register, 30000, "Will retry to register...");
+    }
+  );
+}
+register();
+
 var app = express()
-app.use('/healthz', function(req, res) {
+app.all('/.well-known/acme-challenge/*', le.middleware());
+app.all('/healthz', function(req, res) {
   res.send("Living");
 });
-app.use('/', auth.connect(basic), function (req, req) {
+app.all('/*', auth.connect(basic), function (req, res) {
   proxy.web(req, res);
 });
 
