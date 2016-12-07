@@ -1,5 +1,7 @@
 var http      = require('http');
 var httpProxy = require('http-proxy');
+var auth      = require('http-auth');
+
 
 var proxy = httpProxy.createProxyServer({
 	target: {
@@ -8,7 +10,14 @@ var proxy = httpProxy.createProxyServer({
 	}
 });
 
-var proxyServer = http.createServer(function (req, res) {
+var basic = auth.basic({
+		realm: "Authentication"
+	}, function(user, pass, callback) {
+		callback(user === process.env.USER && pass === process.env.PASS);
+	}
+);
+
+var proxyServer = http.createServer(basic, function (req, res) {
 	proxy.web(req, res);
 });
 
