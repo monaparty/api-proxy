@@ -1,12 +1,13 @@
 var http      = require('http');
 var httpProxy = require('http-proxy');
 var auth      = require('http-auth');
+var express   = require('express');
 
-
+/* ReverseProxy */
 var proxy = httpProxy.createProxyServer({
 	target: {
-		host: 'eclipse-che.default.svc.cluster.local',
-		port: 8080
+		host: process.env.BACKEND_HOST,
+		port: process.env.BACKEND_PORT
 	}
 });
 
@@ -21,8 +22,18 @@ var proxyServer = http.createServer(basic, function (req, res) {
 	proxy.web(req, res);
 });
 
+var app = express()
+app.use('/healthz', function(req, res) {
+  res.send("Living");
+});
+app.use('/', auth.connect(basic), function (req, req) {
+  proxy.web(req, res);
+});
+
+var proxyServer = http.createServer(app);
+
 proxyServer.on('upgrade', function(req, socket, head) {
-	proxy.ws(req, socket, head);
+  proxy.ws(req, socket, head);
 });
 
 /* Avoid CORS. */
