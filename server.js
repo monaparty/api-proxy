@@ -45,11 +45,11 @@ app.all('/healthz', (req, res) => {
   res.send("Living");
 });
 
-app.all('/agent-binaries/*', (req, req) => {
+app.all('/wsmaster/api/*', auth.connect(basic), (req, res) => {
   proxy.web(req, res);
 });
 
-app.all('/*', auth.connect(basic), (req, res) => {
+app.all('/*', (req, req) => {
   proxy.web(req, res);
 });
 
