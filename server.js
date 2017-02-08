@@ -13,7 +13,7 @@ var proxy = httpProxy.createProxyServer({
 
 var basic = auth.basic({
 		realm: "Authentication"
-	}, function(user, pass, callback) {
+	}, (user, pass, callback) => {
 		callback(user === process.env.USER && pass === process.env.PASS);
 	}
 );
@@ -29,7 +29,7 @@ var opts = {
 };
 
 function register() {
-  le.register(opts).then(function (certs) {
+  le.register(opts).then((certs) => {
       console.log(certs);
     }, function (err) {
       console.error(err);
@@ -41,21 +41,26 @@ register();
 
 var app = express()
 app.all('/.well-known/acme-challenge/*', le.middleware());
-app.all('/healthz', function(req, res) {
+app.all('/healthz', (req, res) => {
   res.send("Living");
 });
-app.all('/*', auth.connect(basic), function (req, res) {
+
+app.all('/agent-binaries/*', (req, req) => {
+  proxy.web(req, res);
+});
+
+app.all('/*', auth.connect(basic), (req, res) => {
   proxy.web(req, res);
 });
 
 var proxyServer = http.createServer(app);
 
-proxyServer.on('upgrade', function(req, socket, head) {
+proxyServer.on('upgrade', (req, socket, head) => {
   proxy.ws(req, socket, head);
 });
 
 /* Avoid CORS. */
-proxyServer.on('proxyRes', function(proxyRes, req, res) {
+proxyServer.on('proxyRes', (proxyRes, req, res) => {
 	res.setHeader('Access-Control-Allow-Origin', '*');
 	res.setHeader('Access-Control-Request-Method', '*');
 	res.setHeader('Access-Control-Allow-Methods', 'POST, GET, DELETE, OPTIONS');
