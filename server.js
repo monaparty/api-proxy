@@ -49,7 +49,7 @@ app.all('/wsmaster/api/*', auth.connect(basic), (req, res) => {
   proxy.web(req, res);
 });
 
-app.all('/*', (req, req) => {
+app.all('/*', (req, res) => {
   proxy.web(req, res);
 });
 
