@@ -2,6 +2,7 @@ const http      = require('http');
 const httpProxy = require('http-proxy');
 const auth      = require('http-auth');
 const express   = require('express');
+const cors      = require('cors');
 
 /* ReverseProxy */
 const proxy = httpProxy.createProxyServer({
@@ -40,6 +41,8 @@ function register() {
 register();
 
 const app = express()
+app.use(cors);
+
 app.all('/.well-known/acme-challenge/*', le.middleware());
 app.all('/healthz', (req, res) => {
   res.send("Living");
@@ -60,7 +63,8 @@ proxyServer.on('upgrade', (req, socket, head) => {
 });
 
 /* Avoid CORS. */
-proxyServer.on('proxyRes', (proxyRes, req, res) => {
+/*
+  proxyServer.on('proxyRes', (proxyRes, req, res) => {
 	res.setHeader('Access-Control-Allow-Origin', '*');
 	res.setHeader('Access-Control-Request-Method', '*');
 	res.setHeader('Access-Control-Allow-Methods', 'POST, GET, DELETE, OPTIONS');
@@ -71,5 +75,6 @@ proxyServer.on('proxyRes', (proxyRes, req, res) => {
 		return;
 	}
 });
+*/
 
 proxyServer.listen(process.env.PORT || 5000);

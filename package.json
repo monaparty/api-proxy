@@ -6,6 +6,7 @@
     "node": "6.2.1"
   },
   "dependencies": {
+    "cors": "^2.8.3",
     "express": "~3.3.4",
     "http-proxy": "1.14.0",
     "http-auth": "3.0.0",
