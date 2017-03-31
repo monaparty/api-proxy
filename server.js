@@ -1,28 +1,28 @@
-var http      = require('http');
-var httpProxy = require('http-proxy');
-var auth      = require('http-auth');
-var express   = require('express');
+const http      = require('http');
+const httpProxy = require('http-proxy');
+const auth      = require('http-auth');
+const express   = require('express');
 
 /* ReverseProxy */
-var proxy = httpProxy.createProxyServer({
+const proxy = httpProxy.createProxyServer({
 	target: {
 		host: process.env.BACKEND_HOST,
 		port: process.env.BACKEND_PORT
 	}
 });
 
-var basic = auth.basic({
+const basic = auth.basic({
 		realm: "Authentication"
 	}, (user, pass, callback) => {
 		callback(user === process.env.USER && pass === process.env.PASS);
 	}
 );
 
-var le = require('letsencrypt').create(
+const le = require('letsencrypt').create(
   { server: 'https://acme-v01.api.letsencrypt.org/directory'
 });
 
-var opts = {
+const opts = {
   email: process.env.EMAIL,
   agreeTos: true,
   domains: [ process.env.DOMAIN ],
@@ -39,7 +39,7 @@ function register() {
 }
 register();
 
-var app = express()
+const app = express()
 app.all('/.well-known/acme-challenge/*', le.middleware());
 app.all('/healthz', (req, res) => {
   res.send("Living");
@@ -53,7 +53,7 @@ app.all('/*', (req, res) => {
   proxy.web(req, res);
 });
 
-var proxyServer = http.createServer(app);
+const proxyServer = http.createServer(app);
 
 proxyServer.on('upgrade', (req, socket, head) => {
   proxy.ws(req, socket, head);
