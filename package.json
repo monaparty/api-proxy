@@ -10,5 +10,8 @@
     "http-proxy": "1.14.0",
     "http-auth": "3.0.0",
     "letsencrypt": "2.1.7"
+  },
+  "devDependencies": {
+    "eslint": "^3.18.0"
   }
 }
