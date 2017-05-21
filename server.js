@@ -8,7 +8,8 @@ const cors      = require('cors');
 const proxy = httpProxy.createProxyServer({
 	target: {
 		host: process.env.BACKEND_HOST,
-		port: process.env.BACKEND_PORT
+		port: process.env.BACKEND_PORT,
+		proxyTimeout: 1800000 /* 30min */
 	}
 });
 
@@ -19,40 +20,38 @@ const basic = auth.basic({
 	}
 );
 
-const le = require('letsencrypt').create(
-  { server: 'https://acme-v01.api.letsencrypt.org/directory'
-});
+//const le = require('letsencrypt').create({
+//// server: 'https://acme-v01.api.letsencrypt.org/directory'
+//  server: 'staging'
+//});
+//
+//const opts = {
+//  email: process.env.EMAIL,
+//  agreeTos: true,
+//  domains: [ process.env.DOMAIN ],
+//};
+//
+//function register() {
+//  le.register(opts)
+//    .then(certs => {
+//      console.log(certs);
+//    })
+//    .catch(err => {
+//      console.error(err);
+//      setTimeout(register, 30000, "Will retry to register...");
+//    });
+//}
+//register();
 
-const opts = {
-  email: process.env.EMAIL,
-  agreeTos: true,
-  domains: [ process.env.DOMAIN ],
-};
+const app = express();
+app.use(cors());
 
-function register() {
-  le.register(opts).then((certs) => {
-      console.log(certs);
-    }, function (err) {
-      console.error(err);
-      setTimeout(register, 30000, "Will retry to register...");
-    }
-  );
-}
-register();
-
-const app = express()
-app.use(cors);
-
-app.all('/.well-known/acme-challenge/*', le.middleware());
+//app.all('/.well-known/acme-challenge/*', le.middleware());
 app.all('/healthz', (req, res) => {
   res.send("Living");
 });
 
-app.all('/wsmaster/api/*', auth.connect(basic), (req, res) => {
-  proxy.web(req, res);
-});
-
-app.all('/*', (req, res) => {
+app.all('/*', auth.connect(basic), (req, res) => {
   proxy.web(req, res);
 });
 
@@ -62,19 +61,6 @@ proxyServer.on('upgrade', (req, socket, head) => {
   proxy.ws(req, socket, head);
 });
 
-/* Avoid CORS. */
-/*
-  proxyServer.on('proxyRes', (proxyRes, req, res) => {
-	res.setHeader('Access-Control-Allow-Origin', '*');
-	res.setHeader('Access-Control-Request-Method', '*');
-	res.setHeader('Access-Control-Allow-Methods', 'POST, GET, DELETE, OPTIONS');
-	res.setHeader('Access-Control-Allow-Headers', 'authorization, content-type');
-	if (req.method === 'OPTIONS') {
-		res.writeHead(200);
-		res.end();
-		return;
-	}
+proxyServer.listen(process.env.PORT || 5000, () => {
+  console.log('Server listening');
 });
-*/
-
-proxyServer.listen(process.env.PORT || 5000);
